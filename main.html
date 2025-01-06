@@ -6,10 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Ondřej Duba, Filip Molhanec">
-<meta name="dcterms.date" content="2025-01-05">
+<meta name="author" content="Ondřej Duba">
+<meta name="author" content="Filip Molhanec">
+<meta name="dcterms.date" content="2025-01-10">
 
-<title>K-Nearest Neighbours algorithm</title>
+<title>K-Nearest Neighbours</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -69,51 +70,107 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="main_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="main_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="main_files/libs/bootstrap/bootstrap-8a79a254b8e706d3c925cde0a310d4f0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="main_files/libs/quarto-diagram/mermaid.min.js"></script>
+<script src="main_files/libs/quarto-diagram/mermaid-init.js"></script>
+<link href="main_files/libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
 <body class="fullcontent">
 
-<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">K-Nearest Neighbours algorithm</h1>
-</div>
-
-
-
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Ondřej Duba, Filip Molhanec </p>
-          </div>
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">K-Nearest Neighbours</h1>
+                      </div>
   </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">January 5, 2025</p>
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author">Ondřej Duba <a href="mailto:ondra.duba17@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
     </div>
-  </div>
-  
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://www.cvut.cz/en">
+              Czech technical university in Prague
+              </a>
+            </p>
+        </div>
+      <div class="quarto-title-meta-contents">
+      <p class="author">Filip Molhanec </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://www.cvut.cz/en">
+              Czech technical university in Prague
+              </a>
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 10, 2025</p>
+      </div>
+    </div>
     
-  </div>
+      
+    </div>
+    
   
+  </header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
-</header>
 
 
-<section id="polar-axis" class="level2">
-<h2 class="anchored" data-anchor-id="polar-axis">Polar Axis</h2>
-<p>For a demonstration of a line plot on a polar axis, see <strong>?@fig-polar</strong>.</p>
-<div id="fc476b3e-47d9-4f03-89f7-67b199cd364c" class="cell" data-execution_count="2">
+
+<section id="what-is-knn" class="level1">
+<h1>What is KNN?</h1>
+<p>Although K-Nearest Neigbours (KNN) is often regarded as very simple machine learning algorithm, its utility and power are undeniable. It is one of the core algorithms for supervised learning, KNN can be effectively used for both classification and regression tasks. The simplest explanation of KNN for classification tasks is that an object is classifed by plurality vote of its <em>k</em> nearest neighbours. For regression tasks, KNN can be generalized so that an object is assigned value that is the average of the values of its <em>k</em> nearest neigbours. However, this is just a basic overview and there are several factors to consider when using KNN to develop an effective machine learning model.</p>
+<p><span class="math display">\[
+\large
+\displaystyle \int_{-\infty}^{+\infty} f(x)' \, dx
+\]</span></p>
+<div id="fc476b3e-47d9-4f03-89f7-67b199cd364c" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.arange(<span class="dv">0</span>, <span class="dv">2</span>, <span class="fl">0.01</span>)</span>
@@ -127,14 +184,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="main_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="main_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
+<section id="sources" class="level2">
+<h2 class="anchored" data-anchor-id="sources">Sources:</h2>
+<p><a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" class="uri">https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm</a> - [ ] Task 1</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A[Hard edge] --&gt; B(Round edge)
+  B --&gt; C{Decision}
+  C --&gt; D[Result one]
+  C --&gt; E[Result two]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
 </section>
 
-</main>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-copyright"><h2 class="anchored quarto-appendix-heading">Copyright</h2><div class="quarto-appendix-contents"><div>CC BY 2025</div></div></section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
