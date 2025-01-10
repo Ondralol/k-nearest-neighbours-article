@@ -166,32 +166,179 @@ window.Quarto = {
 <section id="what-is-knn" class="level1">
 <h1>What is KNN?</h1>
 <p>Although K-Nearest Neigbours (KNN) is often regarded as very simple machine learning algorithm, its utility and power are undeniable. It is one of the core algorithms for supervised learning, KNN can be effectively used for both classification and regression tasks. The simplest explanation of KNN for classification tasks is that an object is classifed by plurality vote of its <em>k</em> nearest neighbours. For regression tasks, KNN can be generalized so that an object is assigned value that is the average of the values of its <em>k</em> nearest neigbours. However, this is just a basic overview and there are several factors to consider when using KNN to develop an effective machine learning model.</p>
+<section id="visualization-of-k-nearest-neigbours" class="level2">
+<h2 class="anchored" data-anchor-id="visualization-of-k-nearest-neigbours">Visualization of <em>k</em> nearest neigbours</h2>
+<p>Let’s start with a very simple visualization so that you can better imagine the core principle of this algorithm.</p>
+<div id="cabc4a47-e4bb-4f84-be06-06778ef4b3c8" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df_data <span class="op">=</span> pd.read_csv(<span class="st">"data/star_classification.csv"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>display(df_data.info())</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>df_data <span class="op">=</span> df_data.head(<span class="dv">1000</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>df_data <span class="op">=</span> df_data.drop([<span class="st">'obj_ID'</span>, <span class="st">'run_ID'</span>, <span class="st">'rerun_ID'</span>, <span class="st">'cam_col'</span>, <span class="st">'field_ID'</span>, <span class="st">'spec_obj_ID'</span>, <span class="st">'MJD'</span>, <span class="st">'fiber_ID'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>df_data[<span class="st">"class"</span>] <span class="op">=</span> df_data[<span class="st">"class"</span>].astype(<span class="st">"category"</span>).cat.codes</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>Xdata <span class="op">=</span> df_data.drop(<span class="st">"class"</span>, axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Ydata <span class="op">=</span> df_data[<span class="st">"class"</span>]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>randomState <span class="op">=</span> <span class="dv">42</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>Xtrain, Xtest, Ytrain, Ytest <span class="op">=</span> train_test_split(Xdata, Ydata, test_size <span class="op">=</span> <span class="fl">0.4</span>, random_state<span class="op">=</span>randomState)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>Xval, Xtest, Yval, Ytest <span class="op">=</span> train_test_split(Xtest, Ytest, test_size <span class="op">=</span> <span class="fl">0.5</span>, random_state<span class="op">=</span>randomState)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 100000 entries, 0 to 99999
+Data columns (total 18 columns):
+ #   Column       Non-Null Count   Dtype  
+---  ------       --------------   -----  
+ 0   obj_ID       100000 non-null  float64
+ 1   alpha        100000 non-null  float64
+ 2   delta        100000 non-null  float64
+ 3   u            100000 non-null  float64
+ 4   g            100000 non-null  float64
+ 5   r            100000 non-null  float64
+ 6   i            100000 non-null  float64
+ 7   z            100000 non-null  float64
+ 8   run_ID       100000 non-null  int64  
+ 9   rerun_ID     100000 non-null  int64  
+ 10  cam_col      100000 non-null  int64  
+ 11  field_ID     100000 non-null  int64  
+ 12  spec_obj_ID  100000 non-null  float64
+ 13  class        100000 non-null  object 
+ 14  redshift     100000 non-null  float64
+ 15  plate        100000 non-null  int64  
+ 16  MJD          100000 non-null  int64  
+ 17  fiber_ID     100000 non-null  int64  
+dtypes: float64(10), int64(7), object(1)
+memory usage: 13.7+ MB</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>None</code></pre>
+</div>
+</div>
+<div id="5e3a6488-3337-40fc-bc8b-077c9f95ccdc" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> ParameterGrid</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'n_neighbors'</span>: <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">50</span>), </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'weights'</span>: [<span class="st">'uniform'</span>, <span class="st">'distance'</span>],</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'leaf_size'</span>: <span class="bu">range</span> (<span class="dv">30</span>,<span class="dv">50</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'p'</span>: <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">5</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting all combinations of hyperparameters</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>param_comb <span class="op">=</span> ParameterGrid(param_grid)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>size <span class="op">=</span> <span class="bu">len</span>(param_comb)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(size)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalizing training and validating datasets</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> MinMaxScaler</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Using min max scaler toscale the data between values (0, 1)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> MinMaxScaler()</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Scaling training data</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>Xtrain_scaled <span class="op">=</span> pd.DataFrame(scaler.fit_transform(Xtrain), index<span class="op">=</span>Xtrain.index, columns<span class="op">=</span>Xtrain.columns)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Scale validating data</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>Xval_scaled <span class="op">=</span> pd.DataFrame(scaler.transform(Xval), index<span class="op">=</span>Xval.index, columns<span class="op">=</span>Xval.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>7840</code></pre>
+</div>
+</div>
+<div id="3da5d38e-1675-4e2e-b405-76db3ab3158b" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn.metrics <span class="im">as</span> metrics</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>val_acc <span class="op">=</span> []</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> []</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> params <span class="kw">in</span> param_comb:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">%</span> <span class="dv">500</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(i)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    clfKNN <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span>params[<span class="st">'n_neighbors'</span>], p<span class="op">=</span>params[<span class="st">'p'</span>])</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    clfKNN.fit(Xtrain_scaled, Ytrain)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Predict accuracy on training dataset</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    train_acc.append(metrics.accuracy_score(Ytrain, clfKNN.predict(Xtrain_scaled)))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Predict accuracy on validating data</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    val_acc.append(metrics.accuracy_score(Yval, clfKNN.predict(Xval_scaled)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>500
+1000
+1500
+2000
+2500
+3000
+3500
+4000
+4500
+5000
+5500
+6000
+6500
+7000
+7500</code></pre>
+</div>
+</div>
+<div id="46a5d113-95d7-435b-ae41-3a675acebc67" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>best_params <span class="op">=</span> param_comb[np.argmax(val_acc)]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Displaying the best hyperparameters</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>display(best_params)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>clfKNN <span class="op">=</span> KNeighborsClassifier(<span class="op">**</span>best_params) </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>clfKNN.fit(Xtrain_scaled, Ytrain)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Accuracy score for TRAIN dataset: </span><span class="sc">{0:.6f}</span><span class="st">'</span>.<span class="bu">format</span>(metrics.accuracy_score(Ytrain, clfKNN.predict(Xtrain_scaled))))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Accuracy score for VALIDATING dataset: </span><span class="sc">{0:.6f}</span><span class="st">'</span>.<span class="bu">format</span>(metrics.accuracy_score(Yval, clfKNN.predict(Xval_scaled))))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>Xtest_scaled <span class="op">=</span> pd.DataFrame(scaler.transform(Xtest), index<span class="op">=</span>Xtest.index, columns<span class="op">=</span>Xtest.columns)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Accuracy score for TEST dataset: </span><span class="sc">{0:.6f}</span><span class="st">'</span>.<span class="bu">format</span>(metrics.accuracy_score(Ytest, clfKNN.predict(Xtest_scaled))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre><code>{'weights': 'uniform', 'p': 1, 'n_neighbors': 2, 'leaf_size': 30}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy score for TRAIN dataset: 0.903333
+Accuracy score for VALIDATING dataset: 0.865000
+Accuracy score for TEST dataset: 0.845000</code></pre>
+</div>
+</div>
 <p><span class="math display">\[
 \large
 \displaystyle \int_{-\infty}^{+\infty} f(x)' \, dx
 \]</span></p>
-<div id="fc476b3e-47d9-4f03-89f7-67b199cd364c" class="cell" data-execution_count="10">
+<div id="fc476b3e-47d9-4f03-89f7-67b199cd364c" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.arange(<span class="dv">0</span>, <span class="dv">2</span>, <span class="fl">0.01</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> np.pi <span class="op">*</span> r</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(subplot_kw<span class="op">=</span>{<span class="st">'projection'</span>: <span class="st">'polar'</span>})</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ax.plot(theta, r)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>ax.set_rticks([<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>])</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.arange(<span class="dv">0</span>, <span class="dv">2</span>, <span class="fl">0.01</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> np.pi <span class="op">*</span> r</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(subplot_kw<span class="op">=</span>{<span class="st">'projection'</span>: <span class="st">'polar'</span>})</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>ax.plot(theta, r)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>ax.set_rticks([<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>])</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="main_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="main_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<section id="sources" class="level2">
-<h2 class="anchored" data-anchor-id="sources">Sources:</h2>
-<p><a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" class="uri">https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm</a> - [ ] Task 1</p>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
@@ -208,6 +355,10 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<section id="sources" class="level4">
+<h4 class="anchored" data-anchor-id="sources">Sources:</h4>
+<p><a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" class="uri">https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm</a></p>
+</section>
 </section>
 </section>
 
