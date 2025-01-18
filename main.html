@@ -75,6 +75,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 <script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -167,7 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="preprocessing-data" class="level1">
 <h1>Preprocessing data</h1>
 <p>As part of data preprocessing we read data from csv file and then we preprocess them. Considering that there are no missing values, there is no need to fill them. All features are already numerical, so there is no need to convert them any further. Target variable can be 4 values, and there is order between those values (it is ordinal categorical datatype), so we convert it into categorical type with order between them. We split data into 3 parts, train, validate and test with train size being 60% of the original dataset and validate and test both being 20% of the original dataset</p>
-<div id="feee5c30-cf94-4cac-a7d7-2c2d748e1249" class="cell" data-execution_count="38">
+<div id="feee5c30-cf94-4cac-a7d7-2c2d748e1249" class="cell" data-execution_count="284">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> preprocess_data(df:pd.DataFrame)<span class="op">-&gt;</span>pd.DataFrame:</span>
@@ -179,7 +208,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="ec010468-16b1-47cb-9ec0-33901f44c894" class="cell" data-execution_count="39">
+<div id="ec010468-16b1-47cb-9ec0-33901f44c894" class="cell" data-execution_count="285">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> read_data(path:<span class="bu">str</span><span class="op">=</span><span class="st">'data/data.csv'</span>, y:<span class="bu">str</span><span class="op">=</span><span class="st">'Air Quality'</span>,<span class="op">**</span>kwargs)<span class="op">-&gt;</span><span class="bu">tuple</span>:</span>
@@ -206,7 +235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Xtrain, Xtest, Xval, ytrain, ytest, yval</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="821ba698-985c-4bf1-8f8f-7df09cb097b4" class="cell" data-execution_count="40">
+<div id="821ba698-985c-4bf1-8f8f-7df09cb097b4" class="cell" data-execution_count="286">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Xtrain, Xtest, Xval, ytrain, ytest, yval <span class="op">=</span> read_data(seed<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -218,7 +247,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="dataset-analyzation" class="level1">
 <h1>Dataset analyzation</h1>
-<div id="322da89e-9def-4990-a09b-72826d570f0c" class="cell" data-execution_count="167">
+<div id="322da89e-9def-4990-a09b-72826d570f0c" class="cell" data-execution_count="288">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_original <span class="op">=</span> pd.read_csv(<span class="st">'data/data.csv'</span>)</span>
@@ -246,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>ax2.pie(animal_count, labels<span class="op">=</span>animal_count.index,autopct<span class="op">=</span><span class="st">'%.0f</span><span class="sc">%%</span><span class="st">'</span>, textprops<span class="op">=</span>{<span class="st">"fontsize"</span>: <span class="dv">13</span>})</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">"Air quality distribution in dataset"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="167">
+<div class="cell-output cell-output-display" data-execution_count="288">
 <pre><code>Text(0.5, 1.0, 'Air quality distribution in dataset')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -257,7 +286,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="f7e41225-5e61-4f96-8257-4c640be949b4" class="cell" data-execution_count="169">
+<div id="f7e41225-5e61-4f96-8257-4c640be949b4" class="cell" data-execution_count="289">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df_original.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -282,7 +311,7 @@ dtypes: float64(8), int64(1), object(1)
 memory usage: 390.8+ KB</code></pre>
 </div>
 </div>
-<div id="943d0ec0-de64-46b0-a4c6-eef0de2e4b85" class="cell" data-execution_count="289">
+<div id="943d0ec0-de64-46b0-a4c6-eef0de2e4b85" class="cell" data-execution_count="290">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>))</span>
@@ -296,8 +325,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Temperature frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Temperature"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Temperature histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Temperature (°C)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -312,8 +341,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Humidity frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Humidity"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Humidity histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Humidity (%)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -329,8 +358,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"PM2.5 frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"PM2.5"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"PM2.5 histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"PM2.5 (µg/m³)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -345,9 +374,9 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"PM10 frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"PM10 histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
 <span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"PM10"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
-<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency (µg/m³)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
 <span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    ax.text(bins[i]<span class="op">+</span><span class="fl">15.5</span>, count <span class="op">+</span> <span class="dv">10</span>, <span class="bu">int</span>(count), ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -360,7 +389,7 @@ memory usage: 390.8+ KB</code></pre>
 </div>
 </div>
 </div>
-<div id="cf58ec3a-245b-4d7d-a9f5-a755f2f53ca7" class="cell" data-execution_count="299">
+<div id="cf58ec3a-245b-4d7d-a9f5-a755f2f53ca7" class="cell" data-execution_count="291">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>))</span>
@@ -374,8 +403,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"NO2 frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"NO2"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"NO2 histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"NO2 (ppb)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -390,8 +419,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"SO2 frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"SO2"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"SO2 histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"SO2 (ppb)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -407,8 +436,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="ss">f'</span><span class="sc">{</span>x<span class="sc">:.1f}</span><span class="ss">'</span> <span class="cf">for</span> x <span class="kw">in</span> bins]) </span>
 <span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"CO frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"CO"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"CO histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"CO (ppm)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -423,8 +452,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Proximity to Industrial Areas frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Proximity to Industrial Areas"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Proximity to Industrial Areas histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Proximity to Industrial Areas (km)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -438,10 +467,10 @@ memory usage: 390.8+ KB</code></pre>
 </div>
 </div>
 </div>
-<div id="f25e94d3-4fe2-4e38-adec-93e40f044459" class="cell" data-execution_count="361">
+<div id="f25e94d3-4fe2-4e38-adec-93e40f044459" class="cell" data-execution_count="292">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">15</span>))</span>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">13</span>))</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>,<span class="dv">0</span>]</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the histogram</span></span>
@@ -451,8 +480,8 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> bins])</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Set titles and labels</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Population Density frequency histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Population Density"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Population Density histogram"</span>, fontsize <span class="op">=</span> <span class="dv">17</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Population Density (people/km²)"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, count <span class="kw">in</span> <span class="bu">enumerate</span>(counts):</span>
@@ -470,7 +499,25 @@ memory usage: 390.8+ KB</code></pre>
 </div>
 </div>
 </div>
-<div id="374954e0-2e58-492c-97f7-7aebcef0d241" class="cell" data-execution_count="41">
+</section>
+<section id="training-model" class="level1">
+<h1>Training model</h1>
+<p>We are trying to solve supervised learning problem, where based on <em>p</em> features $ X_{1}, …, X_{p}$ (<strong>Temperature</strong>, <strong>Humidity</strong>, …) we want to predict the value of target variable <span class="math inline">\(Y\)</span> (<strong>Air Quality</strong>). We can put all of these features into vector <span class="math inline">\(\textbf{X} = (X_{1}, ... X{_p})^T\)</span> which we will interpret as a random vector, and one of its specific realization will be denoted as <span class="math inline">\(\mathbf{x}\)</span>. Let <span class="math inline">\(\mathcal{X}\)</span> where <span class="math inline">\(\textbf{x} \in \mathcal{X}\)</span> be set containing all possible values of these features, typically, and in our case, <span class="math inline">\(\mathcal{X} = \mathbb{R}^p\)</span>. Then we can can describe our training dataset as N pairs <span class="math inline">\((\textbf{x}_{1}, Y_{1}), ..., (\textbf{x}_{p}, Y_{p})\)</span> where <span class="math inline">\(\textbf{x}_{i}\)</span>, respectively <span class="math inline">\(Y_{i}\)</span> is vector of features, respectively target variable. The basic concept of predicting value of data point <span class="math inline">\(\mathbf{x} \in \mathcal{X}\)</span> is finding the k-closest points from it (these points come from the train dataset). If we are solving regression problem, we then then the average from the target varibles of the k-closest neighbours, in classification problem (that’s our case) we take the most frequent value from the target variables of the k-closest neighbours.<br>
+<br>
+When trying to find the best model, there are many things to consider. First of all we should define distance function.<br>
+<strong>Distance</strong> also called <strong>metric</strong> defined on set <span class="math inline">\(\mathcal{X}\)</span> is function d: <span class="math inline">\(\mathcal{X} \times \mathcal{X} \rightarrow [0, +\infty)\)</span> such that for all <span class="math inline">\(x, y, z \in \mathcal{X}\)</span>, the following conditions holds:<br>
+$ i);d(x,y) $, and <span class="math inline">\(d(x,y) = 0\)</span> if and only if <span class="math inline">\(x = y\)</span> (positive definiteness)<br>
+$ ii);d(x,y) = d(y,x)$ (symetry)<br>
+$ iii);d(x,y) d(x,z) + d(z,y)$ (triangle inequality)<br>
+</p>
+<p>The most common distance function used is KNN is Minkowski distance also called q-norm defined as follows:<br>
+<span class="math inline">\(||x-y||_{q} = d_{q}(x,y) = \sqrt[q]{\sum_{i=1}^{p} (x_i - y_i)^q}\)</span></p>
+<p>After we have found k-nearest neighbours, we need to somehow decide what value we should predict. In our case, we could just precict the value with the most frequent target variable. What we can also do is try weighted voting, that means that closer neighbours will have vote with higher value.<br>
+Common choice for weight is inverse distance weighting<br>
+<span class="math inline">\(w_{i} = \frac{1}{d(x,y)}\)</span><br>
+For each category <span class="math inline">\(c\)</span> of the target variable we count the total weighted vote <span class="math inline">\(W_{c} = \sum_{Y_i \in \mathcal{N}} w_i \cdot 1(Y_i = c)\)</span><br>
+where <span class="math inline">\(\mathcal{N}\)</span> is set of target variables of k-nearest neighbours, we then choose $ = W_c $ where <span class="math inline">\(c\)</span> is every possible category of target variable as our prediction</p>
+<div id="374954e0-2e58-492c-97f7-7aebcef0d241" class="cell" data-execution_count="294">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_model(<span class="op">*</span>args,<span class="op">**</span>kwargs):</span>
@@ -487,7 +534,7 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> KNeighborsClassifier(<span class="op">**</span>kwargs).fit(X,y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="4bdedeff-848a-4f35-a033-28b5cf2b053a" class="cell" data-execution_count="42">
+<div id="4bdedeff-848a-4f35-a033-28b5cf2b053a" class="cell" data-execution_count="295">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>color_map <span class="op">=</span> {</span>
@@ -499,7 +546,7 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>category_order <span class="op">=</span> [<span class="st">"Good"</span>, <span class="st">"Moderate"</span>, <span class="st">"Poor"</span>, <span class="st">"Hazardous"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="c6e7651b-ee61-4a81-ba9c-045fbc97153b" class="cell" data-execution_count="43">
+<div id="c6e7651b-ee61-4a81-ba9c-045fbc97153b" class="cell" data-execution_count="296">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_graph(X, y_pred, x_ax<span class="op">=</span><span class="st">'Temperature'</span>, y_ax<span class="op">=</span><span class="st">'Humidity'</span>):</span>
@@ -513,7 +560,7 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="9187c819-2781-4186-bfc2-ab9d6945fb74" class="cell" data-execution_count="44">
+<div id="9187c819-2781-4186-bfc2-ab9d6945fb74" class="cell" data-execution_count="297">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>n_neighbors_slider <span class="op">=</span> widgets.IntSlider(value<span class="op">=</span><span class="dv">5</span>, <span class="bu">min</span><span class="op">=</span><span class="dv">1</span>, <span class="bu">max</span><span class="op">=</span><span class="dv">20</span>, step<span class="op">=</span><span class="dv">1</span>, description<span class="op">=</span><span class="st">"n_neighbors"</span>)</span>
@@ -529,18 +576,23 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="cell-dynamic_graph" class="cell" data-scrolled="true" data-tags="[&quot;interactive&quot;]" data-execution_count="45">
+<div id="cell-dynamic_graph" class="cell" data-scrolled="true" data-tags="[&quot;interactive&quot;]" data-execution_count="298">
 <div id="dynamic_graph" class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"3d14edba90454dc48f5c851945aee4fe","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"410b412d2d0b4461999496ed8b7bbc97","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 <p>Interactive KNN visualization</p>
 </div>
 </div>
 </section>
-<section id="best-model" class="level1">
-<h1>Best model</h1>
-<div id="413606ab-62ba-4fe3-af99-747a9a5813d2" class="cell" data-execution_count="47">
+<section id="finding-the-best-model-hyperparameter-tuning" class="level1">
+<h1>Finding the Best model (Hyperparameter tuning)</h1>
+<p>When finding the best model, there are many things to consider. Our goal is to somehow maximize the classification accuracy on new data, that the model has never seen before. Accuracy is defined as<br>
+<span class="math inline">\(\frac{ \text{number of correctly classified}}{ \text{number of all classified}}\)</span> The accuracy which we are trying to maximize is the accurate of how our model built using <strong>train</strong> dataset will predict on <strong>validating</strong> dataset. In order to maximize this accuracy, we can try changing the number of neighbours (k), then we can try changing the distance metric, lastly, we can try whether using weighted distance makes any difference. We build our model on combination of these different possibilites and for every one of them we predict the accuracy on <strong>validating</strong> dataset. We then chose the model with the highest accuracy.</p>
+<p>$</p>
+<p>$] $</p>
+<p>$</p>
+<div id="413606ab-62ba-4fe3-af99-747a9a5813d2" class="cell" data-execution_count="300">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_best(<span class="op">*</span>args):</span>
@@ -565,7 +617,7 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_comb[np.argmax(val_acc)], train_acc, val_acc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="d32ef8b8-1a2d-43e7-aa1b-f265f8b83ca4" class="cell" data-execution_count="48">
+<div id="d32ef8b8-1a2d-43e7-aa1b-f265f8b83ca4" class="cell" data-execution_count="301">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>best_params_no_scale, train_acc, val_acc <span class="op">=</span> find_best(Xtrain,ytrain,Xval,yval)</span>
@@ -581,7 +633,7 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>best_params_minmax, train_acc, val_acc <span class="op">=</span> find_best(Xtrain_fit,ytrain,Xval_fit,yval)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="6e750835-8e3d-4053-b9fa-fc94fcfb174a" class="cell" data-execution_count="50">
+<div id="6e750835-8e3d-4053-b9fa-fc94fcfb174a" class="cell" data-execution_count="302">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">5</span>))</span>
@@ -600,7 +652,7 @@ memory usage: 390.8+ KB</code></pre>
 </div>
 </div>
 </div>
-<div id="483272d9-4e0c-4713-9ffa-ce61bf16a2c5" class="cell" data-execution_count="49">
+<div id="483272d9-4e0c-4713-9ffa-ce61bf16a2c5" class="cell" data-execution_count="303">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>clfKNN <span class="op">=</span> KNeighborsClassifier(<span class="op">**</span>best_params_no_scale)</span>
@@ -609,12 +661,17 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>display(metrics.accuracy_score(yval, y_knn_val))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<pre><code>0.835</code></pre>
+<pre><code>0.833</code></pre>
 </div>
 </div>
-<section id="using-standard-scaler" class="level2">
-<h2 class="anchored" data-anchor-id="using-standard-scaler">Using Standard Scaler</h2>
-<div id="09c58b7a-f26b-4d3a-9394-f334b7a9f68a" class="cell" data-execution_count="52">
+</section>
+<section id="normalization" class="level1">
+<h1>Normalization</h1>
+<p>One technique that can also help with making the model more accurate is normalization. In some cases, the features are difficult to compare and it is essentially impossible to find a universal measure. This can be addressed by using clever methods to normalize the data using linear transformation. The simplest method used to normalize data is called <strong>min-max</strong> normalization which scales every element in selected feature into interval <span class="math inline">\([0,1]\)</span>. It is defined as follows:<br>
+For given feature let’s call his minimal value <span class="math inline">\(\text{min}_x\)</span> and the maximal value <span class="math inline">\(\text{max}_x\)</span>, then we will define the value <span class="math inline">\(x_i\)</span> of this feature&nbsp; <span class="math inline">\(x_i \leftarrow \frac{ x_i - \text{min}_x}{ \text{max}_i - \text{min}_x}\)</span><br>
+</p>
+<p>Another commonly used normalization method is standardization, defined as follows <span class="math inline">\(x_i \leftarrow \frac{x_i - \bar{x}}{\sqrt{s_x^2}}\)</span> where <span class="math inline">\(\bar{x} = \frac{1}{n} \sum_{i} x_i\)</span> is sample mean and <span class="math inline">\(s_x^2 = \frac{1}{n-1} \sum_{i}^{} {(x_i - \bar{x})^2}\)</span></p>
+<div id="09c58b7a-f26b-4d3a-9394-f334b7a9f68a" class="cell" data-execution_count="305">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
@@ -627,10 +684,10 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>display(metrics.accuracy_score(yval, y_knn_val))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<pre><code>0.9283333333333333</code></pre>
+<pre><code>0.931</code></pre>
 </div>
 </div>
-<div id="364162d8-98f6-4392-b9fd-0fb0eb42c6b0" class="cell" data-execution_count="51">
+<div id="364162d8-98f6-4392-b9fd-0fb0eb42c6b0" class="cell" data-execution_count="306">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>clfKNN <span class="op">=</span> KNeighborsClassifier(<span class="op">**</span>best_params_minmax)</span>
@@ -639,10 +696,10 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>display(metrics.accuracy_score(yval, y_knn_val))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<pre><code>0.9383333333333334</code></pre>
+<pre><code>0.923</code></pre>
 </div>
 </div>
-<div id="52f77e6c-a57a-4ddf-aabc-016746fbe2a8" class="cell" data-execution_count="111">
+<div id="52f77e6c-a57a-4ddf-aabc-016746fbe2a8" class="cell" data-execution_count="307">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix, ConfusionMatrixDisplay</span>
@@ -659,23 +716,23 @@ memory usage: 390.8+ KB</code></pre>
 <span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Predicted"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span>
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"True"</span>, fontsize <span class="op">=</span> <span class="dv">13</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="111">
+<div class="cell-output cell-output-display" data-execution_count="307">
 <pre><code>Text(0, 0.5, 'True')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="main_files/figure-html/cell-23-output-2.png" class="img-fluid figure-img"></p>
+<p><img src="main_files/figure-html/cell-22-output-2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="786710cd-03f2-4b36-94ed-a0d3ea33996d" class="cell" data-execution_count="53">
+<div id="786710cd-03f2-4b36-94ed-a0d3ea33996d" class="cell" data-execution_count="308">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>best_params_minmax</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="53">
+<div class="cell-output cell-output-display" data-execution_count="308">
 <pre><code>{'weights': 'distance', 'p': 3, 'n_neighbors': 3}</code></pre>
 </div>
 </div>
@@ -683,7 +740,6 @@ memory usage: 390.8+ KB</code></pre>
 <h4 class="anchored" data-anchor-id="sources">Sources:</h4>
 <p><a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" class="uri">https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm</a><br>
 <a href="https://www.kaggle.com/datasets/mujtabamatin/air-quality-and-pollution-assessment/data" class="uri">https://www.kaggle.com/datasets/mujtabamatin/air-quality-and-pollution-assessment/data</a></p>
-</section>
 </section>
 </section>
 
