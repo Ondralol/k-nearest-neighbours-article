@@ -3,3 +3,4 @@
 *.pdf
 *.qmd
 *.quarto_ipynb
+*.log
